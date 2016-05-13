@@ -1,0 +1,73 @@
+close all
+
+clear all
+%% FP-SDE as pag 97
+randn('state',100) %select one to be reproducible
+ Xzero = 0;  % CI
+D=1; %diffusion coefficient
+M=1000;% number of particles
+T = 1; N = 100; dt = T/N;         
+dW = ((randn(N,M)));         % Brownian increments
+W = cumsum(dW);  % discretized Brownian path 
+
+Xtemp=Xzero;
+
+for k=1:M  %loop for each cell
+    
+    Xtemp=Xzero;
+   
+for j = 1:N    %time loop
+  
+   Xtemp = sqrt(dt*2*D)*W(j,k); 
+   Xem(j) = Xtemp; %update position
+end
+
+
+plot([0:dt:T],[Xzero,Xem],'r') %plot of the path
+hold on
+
+Xk(k,:)=Xem; %record the path
+end
+
+for i=1:N
+    bb=Xk(:,i);
+    var_s(i)=(sum((bb.*bb)))./M; % variance 
+end
+    
+xlabel('t','FontSize',12)
+ylabel('X','FontSize',16,'Rotation',0,'HorizontalAlignment','right')
+%% PDE with initial delta distribution
+
+load('logsensing_Ka_smalldeltax_D1f=1.00000_R=1.00000.mat')
+L=length(t);
+dx=0.001; %time discratization in the PDE solver
+for i=1:L
+%     mm=min(sol(i,:,1));
+%         MM=max(sol(i,:,1));
+R=sol(i,:,1);
+    ext=find(R>0.005);
+    s(i)=length(ext);
+    v(i)=[(0.5*dx*(-s(i)))];
+        v2(i)=[(0.5*dx*(s(i)))];  %extension of gaussian
+        vari(i)=trapz(x,x.*x.*R); %variance
+figure(1)
+% % plot([mm,MM])
+%   plot(v)
+%   hold on
+% hold ons(1)
+
+% plot(sol(i,:,1),x)
+% hold on
+
+end
+hold on
+ plot(t,v,'b')
+ hold  on
+  plot(t,v2,'b')
+  
+  %% two variance
+  figure(2)
+  plot(vari) %variance for PDE
+  hold on
+  (plot(var_s)) %variance for FP
+
